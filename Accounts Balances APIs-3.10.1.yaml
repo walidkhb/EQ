@@ -1,0 +1,376 @@
+swagger: '2.0'
+info:
+  title: Accounts Balances APIs
+  x-ibm-name: saib-open-banking-balances-apis
+  version: 3.10.1
+  description: The balances resource is used to retrieve in bulk or single account balance information for a specific AccountId for that the FinTech has authorized to access.
+  termsOfService: 'https://www.saib.com.sa/'
+  contact:
+    name: SAIB Team
+    url: 'https://www.saib.com.sa/'
+    email: developer@saib.com.sa
+  license:
+    name: Licensed to SAIB
+    url: 'https://www.saib.com.sa/'
+host: sandbox-api.saib.com.sa
+schemes:
+  - https
+basePath: /saib-open-api/uat/open-banking/v3.10.1/aisp
+produces:
+  - application/json
+consumes:
+  - application/json
+security:
+  - OBA-API2:
+      - accounts
+      - openid
+securityDefinitions:
+  OBA-API:
+    type: oauth2
+    flow: accessCode
+    x-ibm-oauth-provider: saib-open-banking-oauth-oidc
+    authorizationUrl: /saib-oidc/oauth2/authorize
+    tokenUrl: /saib-oidc/oauth2/token
+    scopes:
+      accounts: accounts
+      openid: openid
+  OBA-API2:
+    type: oauth2
+    flow: application
+    x-ibm-oauth-provider: saib-open-banking-oauth-oidc
+    tokenUrl: /saib-oidc/oauth2/token
+    scopes:
+      accounts: accounts
+      openid: Support OIDC
+x-ibm-configuration:
+  testable: true
+  enforced: true
+  cors:
+    enabled: true
+  phase: realized
+  type: rest
+  application-authentication:
+    certificate: false
+  categories:
+    - Corporate Banking
+  servers:
+    - url: 'https://sandbox-api.saib.com.sa/saib-open-api/uat/open-banking/v3.10.1/aisp'
+      description: ''
+      type:
+        - Production
+        - Development
+  oauth-servers:
+    OBA-API2:
+      tokenUrls:
+        - 'https://sandbox-api.saib.com.sa/saib-open-api/uat/saib-oidc/oauth2/token'
+      authorizationUrls: []
+      refreshUrls: []
+parameters: {}
+tags: []
+definitions:
+  OBReadBalance1:
+    type: object
+    additionalProperties: false
+    properties:
+      Data:
+        $ref: '#/definitions/OBReadDataBalance1'
+        properties: {}
+  OBReadDataBalance1:
+    type: object
+    additionalProperties: false
+    properties:
+      Balance:
+        $ref: '#/definitions/OBCashBalance1'
+        properties: {}
+  OBCashBalance1:
+    type: object
+    description: Set of elements used to define the balance details.
+    additionalProperties: false
+    properties:
+      AccountId:
+        type: string
+        description: 'A unique identifier used to identify the account resource. Note: This is the “Account Number” in SAIB.'
+        example: '2228912345678'
+      CreditDebitIndicator:
+        type: string
+        description: Indicates whether the balance is a credit or a debit balance. A zero balance is considered to be a credit balance.
+        example: Credit
+      Type:
+        type: string
+        description: 'Balance type, in a coded form.'
+        example: AvailableBalance
+      DateTime:
+        properties: {}
+        description: Indicates the date (and time) of the balance.
+        example: '2021-11-05T10:43:07+00:00'
+      Amount:
+        $ref: '#/definitions/OBActiveOrHistoricCurrencyAndAmount'
+        properties: {}
+        description: Amount of money of the cash balance.
+      CreditLine:
+        $ref: '#/definitions/OBCreditLine1'
+        properties: {}
+        description: Set of elements used to provide details on the credit line such as Advanced Salary.
+  OBCreditLine1:
+    type: object
+    description: Set of elements used to provide details on the credit line.
+    additionalProperties: false
+    properties:
+      Included:
+        type: boolean
+        description: 'Indicates whether or not the credit line is included in the balance of the account. Usage: If not present, credit line is not included in the balance amount of the account.'
+        example: 'true'
+      Type:
+        type: string
+        description: 'Limit type, in a coded form.'
+        example: OverDraft
+      Amount:
+        $ref: '#/definitions/OBActiveOrHistoricCurrencyAndAmount'
+        properties: {}
+        description: Amount of money of the credit line.
+  OBActiveOrHistoricCurrencyAndAmount:
+    type: object
+    description: Amount of money of the credit line.
+    additionalProperties: false
+    properties:
+      Amount:
+        type: string
+        description: A number of monetary units specified in an active currency where the unit of currency is explicit and compliant with ISO 4217
+        example: '100.00'
+      Currency:
+        type: string
+        description: 'A code allocated to a currency by a Maintenance Agency under an international identification scheme, as described in the latest edition of the international standard ISO 4217 "Codes for the representation of currencies and funds".'
+        example: SAR
+  OBErrorResponse1:
+    type: object
+    description: 'An array of detail error codes, and messages, and URLs to documentation to help remediation.'
+    additionalProperties: false
+    properties:
+      Code:
+        type: string
+        description: 'High level textual error code, to help categorise the errors.'
+        example: 500 INTERNAL_SERVER_ERROR
+      Id:
+        type: string
+        description: 'A unique reference for the error instance, for audit purposes, in case of unknown/unclassified errors.'
+        example: 2b5f0fb2-730b-11e8-adc0-fa7ae01bbebc
+      Message:
+        type: string
+        description: 'Brief Error message, e.g., ''There is something wrong with the request parameters provided'''
+        example: Unexpected/Internal error occurs
+      Errors:
+        $ref: '#/definitions/OBError1'
+        properties: {}
+  OBError1:
+    type: object
+    additionalProperties: false
+    properties:
+      ErrorCode:
+        type: string
+        description: Low level textual error code
+        example: UnexpectedError
+      Message:
+        properties: {}
+        description: 'A description of the error that occurred. e.g., ''A mandatory field           isn''t supplied'' or ''RequestedExecutionDateTime must be in future'''
+        example: No Consent available for this request
+      Path:
+        type: string
+        description: Recommended but optional reference to the JSON Path of the field with error.
+      Url:
+        type: string
+        description: 'URL to help remediate the problem, or provide more information, or to API Reference, or help etc'
+        example: 'https://www.saib.com.sa/'
+paths:
+  /balances:
+    get:
+      tags:
+        - ''
+      summary: Get All Accounts Balances
+      operationId: ''
+      produces: []
+      parameters: []
+      responses:
+        '200':
+          description: Get Account Balances
+          schema:
+            $ref: '#/definitions/OBReadBalance1'
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '402':
+          description: Payment Required!
+        '404':
+          description: Not found
+        '405':
+          description: Method Not Allowed
+        '406':
+          description: Not Acceptable
+        '408':
+          description: Request Timeout!
+        '409':
+          description: Conflict!
+        '415':
+          description: Unsupported Media Type
+        '429':
+          description: Too Many Requests
+        '500':
+          description: Internal Server Error
+        '503':
+          description: Service Unavailable
+      description: 'The bulk retrieval endpoints, for retrieving the account information resources in bulk. This will retrieve the resources for all authorised accounts linked to the account-request.'
+      consumes: []
+    parameters:
+      - name: mock
+        in: header
+        required: false
+        description: Header parameter to decide the kind of the response to be either from mock data or real invocation.
+        type: boolean
+      - name: x-fapi-auth-date
+        in: header
+        required: false
+        description: The time when the PSU last logged in with the TPP.
+        type: string
+      - name: x-fapi-customer-ip-address
+        in: header
+        required: false
+        description: The PSU's IP address if the PSU is currently logged in with the TPP.
+        type: string
+      - name: x-fapi-interaction-id
+        in: header
+        required: false
+        description: 'An UID used as a correlation Id.  If provided, SAIB must "play back" this value in the x-fapi-interaction-id response header.'
+        type: string
+      - name: Authorization
+        in: header
+        required: false
+        description: 'Standard HTTP Header; For OAuth 2.0 / OIDC, this comprises of either the Basic / Bearer Authentication Schemes.'
+        type: string
+      - name: Content-Type
+        in: header
+        required: false
+        description: Standard HTTP Header; Represents the format of the payload being provided in the request. This must be set to application/json.
+        type: string
+      - name: x-saib-user-language
+        in: header
+        required: false
+        description: 'The language used in the TPP application, the default value is "en".'
+        type: string
+      - name: Accept
+        in: header
+        required: false
+        description: 'Indicates which content types, expressed as MIME types.'
+        type: string
+  '/accounts/{AccountId}/balances':
+    get:
+      tags:
+        - ''
+      summary: Retrieve the account balance information resource for a specific AccountId (which is retrieved in the call to GET /accounts).
+      operationId: ''
+      produces: []
+      parameters: []
+      responses:
+        '200':
+          description: Get Account Balances by Account Id
+          schema:
+            $ref: '#/definitions/OBReadBalance1'
+        '400':
+          description: Bad request
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '401':
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '402':
+          description: Payment Required!
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '403':
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '405':
+          description: Method Not Allowed
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '406':
+          description: Not Acceptable
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '408':
+          description: Request Timeout!
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '409':
+          description: Conflict!
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '415':
+          description: Unsupported Media Type
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '429':
+          description: Too Many Requests
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '500':
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+        '503':
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/OBErrorResponse1'
+      description: Retrieve the account balance information resource for a specific AccountId (which is retrieved in the call to GET /accounts).
+      consumes: []
+    parameters:
+      - name: AccountId
+        in: path
+        required: true
+        description: Account Id for retrieving the account balance
+        type: string
+      - name: mock
+        in: header
+        required: false
+        description: Header parameter to decide the kind of the response to be either from mock data or real invocation.
+        type: boolean
+      - name: x-fapi-auth-date
+        in: header
+        required: false
+        description: The time when the PSU last logged in with the TPP.
+        type: string
+      - name: x-fapi-customer-ip-address
+        in: header
+        required: false
+        description: The PSU's IP address if the PSU is currently logged in with the TPP.
+        type: string
+      - name: x-fapi-interaction-id
+        in: header
+        required: false
+        description: 'An UID used as a correlation Id.  If provided, SAIB must "play back" this value in the x-fapi-interaction-id response header.'
+        type: string
+      - name: Authorization
+        in: header
+        required: false
+        description: 'Standard HTTP Header; For OAuth 2.0 / OIDC, this comprises of either the Basic / Bearer Authentication Schemes.'
+        type: string
+      - name: Content-Type
+        in: header
+        required: false
+        description: Standard HTTP Header; Represents the format of the payload being provided in the request. This must be set to application/json.
+        type: string
+      - name: x-saib-user-language
+        in: header
+        required: false
+        description: 'The language used in the TPP application, the default value is "en".'
+        type: string
+      - name: Accept
+        in: header
+        required: false
+        description: 'Indicates which content types, expressed as MIME types.'
+        type: string
